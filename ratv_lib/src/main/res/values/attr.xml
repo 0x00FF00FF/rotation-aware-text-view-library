@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="target_width" format="reference|dimension" />
+    <attr name="target_height" format="reference|dimension" />
+    <attr name="text_size" format="reference|dimension" />
+    <attr name="target_text_size" format="reference|dimension" />
+    <attr name="original_rotation" format="reference|integer" />
+    <attr name="target_rotation" format="reference|integer" />
+    <attr name="text_color" format="reference|color" />
+    <attr name="background_color" format="reference|color" />
+    <attr name="target_text_color" format="reference|color" />
+    <attr name="target_background_color" format="reference|color" />
+    <attr name="attach_default_animator" format="reference|boolean" />
+    <attr name="attach_default_click_listener" format="reference|boolean" />
+
+    <declare-styleable name="RotationAwareTextView">
+        <attr name="target_width" />
+        <attr name="target_height" />
+        <attr name="target_rotation" />
+        <attr name="original_rotation" />
+        <attr name="text_color" />
+        <attr name="background_color" />
+        <attr name="target_text_color" />
+        <attr name="target_background_color" />
+        <attr name="target_text_size" />
+        <attr name="text_size" />
+        <attr name="attach_default_animator" />
+        <attr name="attach_default_click_listener" />
+    </declare-styleable>
+</resources>
