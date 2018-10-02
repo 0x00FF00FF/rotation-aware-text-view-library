@@ -16,10 +16,10 @@ public class RotationAwareClickListener implements View.OnClickListener {
 
             if (view.isDefaultAnimatorEnabled() &&
                     view.isDefaultClickListenerEnabled() &&
-                    view.rotationAnimatorHost != null) {
-                view.rotationAnimatorHost
+                    view.getRotationAnimatorHost() != null) {
+                view.getRotationAnimatorHost()
                         .configureAnimator(reverse)
-                        .setDuration(reverse ? 250 : 200)
+                        .setDuration(reverse ? 1250 : 1200)
                         .start();
             }
 

@@ -10,4 +10,9 @@ interface RotationAware {
     String BACKGROUND_COLOR = "bgColor";
     String TEXT_COLOR = "textColor";
     String TEXT_SIZE = "textSize";
+    String MARGIN_LEFT = "marginLeft";
+    String MARGIN_TOP = "marginTop";
+    String MARGIN_RIGHT = "marginRight";
+    String MARGIN_BOTTOM = "marginBottom";
+
 }

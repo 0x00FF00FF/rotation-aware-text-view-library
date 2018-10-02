@@ -2,14 +2,29 @@
 <resources>
     <attr name="target_width" format="reference|dimension" />
     <attr name="target_height" format="reference|dimension" />
+    <!-- Something here. -->
     <attr name="text_size" format="reference|dimension" />
     <attr name="target_text_size" format="reference|dimension" />
+
+    <attr name="original_margin_left" format="reference|dimension" />
+    <attr name="original_margin_top" format="reference|dimension" />
+    <attr name="original_margin_right" format="reference|dimension" />
+    <attr name="original_margin_bottom" format="reference|dimension" />
+    <attr name="target_margin_left" format="reference|dimension" />
+    <attr name="target_margin_top" format="reference|dimension" />
+    <attr name="target_margin_right" format="reference|dimension" />
+    <attr name="target_margin_bottom" format="reference|dimension" />
+
     <attr name="original_rotation" format="reference|integer" />
     <attr name="target_rotation" format="reference|integer" />
+
     <attr name="text_color" format="reference|color" />
-    <attr name="background_color" format="reference|color" />
+    <attr name="original_text_color" format="reference|color" />
     <attr name="target_text_color" format="reference|color" />
+
+    <attr name="background_color" format="reference|color" />
     <attr name="target_background_color" format="reference|color" />
+
     <attr name="attach_default_animator" format="reference|boolean" />
     <attr name="attach_default_click_listener" format="reference|boolean" />
 
@@ -17,14 +32,24 @@
         <attr name="target_width" />
         <attr name="target_height" />
         <attr name="target_rotation" />
+        <!-- Documentation. -->
         <attr name="original_rotation" />
         <attr name="text_color" />
         <attr name="background_color" />
+        <attr name="original_text_color" />
         <attr name="target_text_color" />
         <attr name="target_background_color" />
         <attr name="target_text_size" />
         <attr name="text_size" />
         <attr name="attach_default_animator" />
         <attr name="attach_default_click_listener" />
+        <attr name="original_margin_left" />
+        <attr name="original_margin_top" />
+        <attr name="original_margin_right" />
+        <attr name="original_margin_bottom" />
+        <attr name="target_margin_left" />
+        <attr name="target_margin_top" />
+        <attr name="target_margin_right" />
+        <attr name="target_margin_bottom" />
     </declare-styleable>
 </resources>

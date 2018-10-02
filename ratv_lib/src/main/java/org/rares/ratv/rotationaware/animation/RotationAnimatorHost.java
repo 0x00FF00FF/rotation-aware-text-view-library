@@ -6,7 +6,7 @@ import android.animation.ValueAnimator;
  * Class that encapsulates animation data.
  */
 public abstract class RotationAnimatorHost {
-    protected ValueAnimator animator;
+    public ValueAnimator animator;
 
     AnimationDTO animationData;
 

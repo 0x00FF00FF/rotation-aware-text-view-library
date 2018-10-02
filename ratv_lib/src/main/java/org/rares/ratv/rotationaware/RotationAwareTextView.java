@@ -11,6 +11,7 @@ import android.text.BoringLayout;
 import android.text.Layout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -20,9 +21,10 @@ import org.rares.ratv.rotationaware.animation.DefaultRotationAnimatorHost;
 import org.rares.ratv.rotationaware.animation.RotationAnimatorHost;
 import org.rares.ratv.rotationaware.animation.RotationAwareUpdateListener;
 
+import java.util.Locale;
+
 
 /**
- *
  * <hr />
  * A custom view that displays text according to view rotation, not exiting layout bounds while rotated. <br />
  * It does not rotate the whole canvas while keeping the layout dimensions like a normal {@link android.widget.TextView} would.
@@ -77,18 +79,38 @@ public class RotationAwareTextView extends View {
     private int defaultTextColor = 0xFF000000;
     private int backgroundColor = defaultBackgroundColor;
 
+    private int originalTextColor = defaultTextColor;
     private int targetTextColor = defaultTextColor;
     private int targetBackgroundColor = 0xFF303030;
 
     private int targetTextSize = minTextSize;
     private int textSize = 40;
+    private int originalTextSize = textSize;
+
+    private int originalMarginLeft = 0;
+    private int originalMarginTop = 0;
+    private int originalMarginRight = 0;
+    private int originalMarginBottom = 0;
+
+    private int targetMarginLeft = 0;
+    private int targetMarginTop = 0;
+    private int targetMarginRight = 0;
+    private int targetMarginBottom = 0;
 
     private boolean enableDefaultAnimator = true;
     private boolean enableDefaultClickListener = false;
 
-    RotationAnimatorHost rotationAnimatorHost = null;
+    private RotationAnimatorHost rotationAnimatorHost = null;
     private View.OnClickListener clickListener = null;
     private RotationAwareUpdateListener animationUpdateListener = null;
+
+    private float horizontalTextOffset = 0;
+
+    public final static int GRAVITY_CENTER = 0;
+    public final static int GRAVITY_START = 1;
+    public final static int GRAVITY_END = 2;
+
+    private int gravity = GRAVITY_CENTER;
 
     public RotationAwareTextView(Context context) {
         super(context);
@@ -116,7 +138,7 @@ public class RotationAwareTextView extends View {
 
         setBackgroundColor(defaultBackgroundColor);
         setTextColor(defaultTextColor);
-        textPaint.setTextSize(textSize);
+        textPaint.setTextSize(originalTextSize);
         textPaint.setAntiAlias(true);
         textPaint.setTypeface(Typeface.DEFAULT);
         targetWidth = (int) (textPaint.getTextSize() * 2);
@@ -140,19 +162,36 @@ public class RotationAwareTextView extends View {
 
             setTargetWidth(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_target_width, getTargetWidth()));
             setTargetHeight(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_target_height, getTargetHeight()));
+
             setTargetRotation(a.getInt(R.styleable.RotationAwareTextView_target_rotation, getTargetRotation()));
             setOriginalRotation(a.getInt(R.styleable.RotationAwareTextView_original_rotation, getOriginalRotation()));
+
             setBackgroundColor(a.getColor(R.styleable.RotationAwareTextView_background_color, defaultBackgroundColor));
             setTargetBackgroundColor(a.getColor(R.styleable.RotationAwareTextView_target_background_color, targetBackgroundColor));
+
             setTextColor(a.getColor(R.styleable.RotationAwareTextView_text_color, textPaint.getColor()));
+            setOriginalTextColor(a.getColor(R.styleable.RotationAwareTextView_original_text_color, textPaint.getColor()));
             setTargetTextColor(a.getColor(R.styleable.RotationAwareTextView_target_text_color, targetTextColor));
-            setTextSize(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_text_size, minTextSize));
+
+            setOriginalTextSize(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_text_size, minTextSize));
             setTargetTextSize(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_target_text_size, minTextSize));
+
+            setOriginalMarginLeft(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_original_margin_left, originalMarginLeft));
+            setOriginalMarginTop(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_original_margin_top, originalMarginTop));
+            setOriginalMarginRight(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_original_margin_right, originalMarginRight));
+            setOriginalMarginBottom(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_original_margin_bottom, originalMarginBottom));
+
+            setTargetMarginLeft(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_target_margin_left, originalMarginLeft));
+            setTargetMarginTop(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_target_margin_top, originalMarginTop));
+            setTargetMarginRight(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_target_margin_right, originalMarginRight));
+            setTargetMarginBottom(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_target_margin_bottom, originalMarginBottom));
+
             enableDefaultAnimator = a.getBoolean(R.styleable.RotationAwareTextView_attach_default_animator, true);
             enableDefaultClickListener = a.getBoolean(R.styleable.RotationAwareTextView_attach_default_click_listener, true);
 
             a.recycle();
 
+            setTextSize(getOriginalTextSize());
             pseudoRotation = originalRotation;
 
             if (enableDefaultAnimator) {
@@ -194,7 +233,7 @@ public class RotationAwareTextView extends View {
             changed = true;
         }
         if (originalHeight == ViewGroup.LayoutParams.WRAP_CONTENT) {
-            originalHeight = (int) textPaint.getTextSize();
+            originalHeight = (int) (textPaint.getTextSize() * 1.25);
             changed = true;
         }
 
@@ -203,16 +242,21 @@ public class RotationAwareTextView extends View {
         }
 
         if (heightMode == MeasureSpec.AT_MOST) {
-            sizeH = Math.min((int) textPaint.getTextSize(), sizeH);
+            sizeH = (int) Math.min((int) textPaint.getTextSize() * 1.25, sizeH);
         }
 
         setMeasuredDimension(sizeW, sizeH);
 
-        createLayout();
-
         if (changed && enableDefaultAnimator) {
             updateDefaultAnimator();
         }
+    }
+
+    @Override
+    public void layout(int l, int t, int r, int b) {
+        super.layout(l, t, r, b);
+//        Log.i(TAG, "layout: " + (r - l));
+        createLayout(r - l);
     }
 
     @Override
@@ -227,6 +271,8 @@ public class RotationAwareTextView extends View {
         clear();
     }
 
+    float w = 0, h = 0;
+
     /**
      * The place where the magic happens. <br />
      * The canvas is rotated by current rotation value. <br />
@@ -240,14 +286,63 @@ public class RotationAwareTextView extends View {
      */
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.save();
+        drawMiddle(canvas);
+//        canvas.save();
+        float rads = (float) Math.toRadians(Math.abs(pseudoRotation));
+        float sin = (float) Math.sin(rads);
+        float cos = (float) Math.cos(rads);
+        float signum = Math.signum(pseudoRotation);
+
+        float textHeight = textPaint.getTextSize() * 0.75f;
+        float textWidth = textPaint.measureText(text);
+
+        // dx:  sin*cw/2 to translate the canvas to the mid point - opposite of sin*(half the text size) to center the text
+        //      +
+        //      ...
+        // dx:  cos*ch/2 to translate the canvas to the mid point - cos*textWidth/2 to center the text <- when rotation is 0
+        //      +
+        //      sin ch/2 + to translate the canvas to the mid point + opposite of sin*(half the text length) to center the text <- when the rotation is 90
+        float dx = sin * canvas.getWidth() / 2 - (-1 * signum) * sin * mLayout.getHeight() / 2;
+        float dy = cos * canvas.getHeight() / 2 - cos * mLayout.getHeight() / 2 +
+                (sin * canvas.getHeight() / 2 + (-1 * signum) * sin * mLayout.getWidth() / 2);
+
+        String log = String.format(Locale.US,
+                "dx: %4.8s dy: %4.8s cw %4s, lw %4s, rads %4.8s",
+                dx, dy, canvas.getWidth(), mLayout.getWidth(), rads);
+
+        Log.i(TAG, "onDraw:" + log);
+
         canvas.translate(
-                (float) (Math.sin(Math.toRadians(-pseudoRotation))) * -mLayout.getHeight() / 2,
-                (float) (Math.cos(Math.toRadians(pseudoRotation))) * -mLayout.getHeight() / 2);
-        canvas.translate(canvas.getWidth() / 2, canvas.getHeight() / 2);
+                dx,
+                dy
+        );
+
+//        canvas.translate(
+//                (float) (Math.sin(Math.toRadians(pseudoRotation)) * (canvas.getWidth() + mLayout.getHeight()) / 2),
+//                (float) ((Math.sin(Math.toRadians(pseudoRotation)) * (canvas.getHeight() + mLayout.getWidth())) / 2
+//                        /*- Math.cos(Math.toRadians(pseudoRotation)) * textPaint.getTextSize() / 10*/
+//                ));
         canvas.rotate(getRotation());
         mLayout.draw(canvas);
-        canvas.restore();
+//        canvas.restore();
+    }
+
+    private void drawMiddle(Canvas canvas) {
+        Paint paint = new Paint();
+        paint.setStrokeWidth(2);
+        paint.setColor(0xFF00AA00);
+        canvas.drawLine(
+                (float) (0),
+                (float) (canvas.getHeight() / 2),
+                (float) (canvas.getWidth()),
+                (float) (canvas.getHeight() / 2),
+                paint);
+        canvas.drawLine(
+                (float) (canvas.getWidth() / 2),
+                (float) (0),
+                (float) (canvas.getWidth() / 2),
+                (float) (canvas.getHeight()),
+                paint);
     }
 
     private AnimationDTO gatherAnimationData() {
@@ -263,8 +358,18 @@ public class RotationAwareTextView extends View {
         animationData.maxTextColor = getTargetTextColor();
         animationData.minBackgroundColor = getBackgroundColor();
         animationData.maxBackgroundColor = getTargetBackgroundColor();
-        animationData.minTextSize = getTextSize();
+        animationData.minTextSize = getOriginalTextSize();
         animationData.maxTextSize = getTargetTextSize();
+
+        animationData.minMarginLeft = getOriginalMarginLeft();
+        animationData.minMarginTop = getOriginalMarginTop();
+        animationData.minMarginRight = getOriginalMarginRight();
+        animationData.minMarginBottom = getOriginalMarginBottom();
+        animationData.maxMarginLeft = getTargetMarginLeft();
+        animationData.maxMarginTop = getTargetMarginTop();
+        animationData.maxMarginRight = getTargetMarginRight();
+        animationData.maxMarginBottom = getTargetMarginBottom();
+
         animationData.updateListener = animationUpdateListener;
 
         return animationData;
@@ -345,7 +450,6 @@ public class RotationAwareTextView extends View {
             return;
         }
         this.text = txt;
-        createLayout();
     }
 
     /**
@@ -362,7 +466,6 @@ public class RotationAwareTextView extends View {
      */
     public void setTextPaint(TextPaint textPaint) {
         this.textPaint = textPaint;
-        createLayout();
     }
 
     /**
@@ -372,7 +475,21 @@ public class RotationAwareTextView extends View {
      */
     public void setTextColor(int color) {
         textPaint.setColor(color);
-        createLayout();
+    }
+
+    /**
+     * @return the color of the text at the beginning of the animation
+     */
+    public int getOriginalTextColor() {
+        return originalTextColor;
+    }
+
+    /**
+     * @param originalTextColor the color of the text at the beginning of the animation.
+     */
+    public void setOriginalTextColor(int originalTextColor) {
+        this.originalTextColor = originalTextColor;
+        updateDefaultAnimator();
     }
 
     /**
@@ -398,10 +515,28 @@ public class RotationAwareTextView extends View {
     }
 
     /**
+     * Handle width care :)
+     *
+     * @param originalWidth the width at start of initial animation.
+     */
+    public void setOriginalWidth(int originalWidth) {
+        this.originalWidth = originalWidth;
+        updateDefaultAnimator();
+    }
+
+    /**
      * @return the height at the beginning of the rotation animation.
      */
     public int getOriginalHeight() {
         return originalHeight;
+    }
+
+    /**
+     * @param originalHeight the height at the start of the initial animation.
+     */
+    public void setOriginalHeight(int originalHeight) {
+        this.originalHeight = originalHeight;
+        updateDefaultAnimator();
     }
 
     /**
@@ -431,6 +566,126 @@ public class RotationAwareTextView extends View {
      */
     public void setOriginalRotation(int originalRotation) {
         this.originalRotation = originalRotation;
+        updateDefaultAnimator();
+    }
+
+    /**
+     * @return pixel value for respective margin
+     */
+    public int getOriginalMarginLeft() {
+        return originalMarginLeft;
+    }
+
+    /**
+     * @param originalMarginLeft pixel value for respective margin
+     */
+    public void setOriginalMarginLeft(int originalMarginLeft) {
+        this.originalMarginLeft = originalMarginLeft;
+        updateDefaultAnimator();
+    }
+
+    /**
+     * @return pixel value for respective margin
+     */
+    public int getOriginalMarginTop() {
+        return originalMarginTop;
+    }
+
+    /**
+     * @param originalMarginTop pixel value for respective margin
+     */
+    public void setOriginalMarginTop(int originalMarginTop) {
+        this.originalMarginTop = originalMarginTop;
+        updateDefaultAnimator();
+    }
+
+    /**
+     * @return pixel value for respective margin
+     */
+    public int getOriginalMarginRight() {
+        return originalMarginRight;
+    }
+
+    /**
+     * @param originalMarginRight pixel value for respective margin
+     */
+    public void setOriginalMarginRight(int originalMarginRight) {
+        this.originalMarginRight = originalMarginRight;
+        updateDefaultAnimator();
+    }
+
+    /**
+     * @return pixel value for respective margin
+     */
+    public int getOriginalMarginBottom() {
+        return originalMarginBottom;
+    }
+
+    /**
+     * @param originalMarginBottom pixel value for respective margin
+     */
+    public void setOriginalMarginBottom(int originalMarginBottom) {
+        this.originalMarginBottom = originalMarginBottom;
+        updateDefaultAnimator();
+    }
+
+    /**
+     * @return pixel value for respective margin
+     */
+    public int getTargetMarginLeft() {
+        return targetMarginLeft;
+    }
+
+    /**
+     * @param targetMarginLeft pixel value for respective margin
+     */
+    public void setTargetMarginLeft(int targetMarginLeft) {
+        this.targetMarginLeft = targetMarginLeft;
+        updateDefaultAnimator();
+    }
+
+    /**
+     * @return pixel value for respective margin
+     */
+    public int getTargetMarginTop() {
+        return targetMarginTop;
+    }
+
+    /**
+     * @param targetMarginTop pixel value for respective margin
+     */
+    public void setTargetMarginTop(int targetMarginTop) {
+        this.targetMarginTop = targetMarginTop;
+        updateDefaultAnimator();
+    }
+
+    /**
+     * @return pixel value for respective margin
+     */
+    public int getTargetMarginRight() {
+        return targetMarginRight;
+    }
+
+    /**
+     * @param targetMarginRight pixel value for respective margin
+     */
+    public void setTargetMarginRight(int targetMarginRight) {
+        this.targetMarginRight = targetMarginRight;
+        updateDefaultAnimator();
+    }
+
+    /**
+     * @return pixel value for respective margin
+     */
+    public int getTargetMarginBottom() {
+        return targetMarginBottom;
+    }
+
+    /**
+     * @param targetMarginBottom pixel value for respective margin
+     */
+    public void setTargetMarginBottom(int targetMarginBottom) {
+        this.targetMarginBottom = targetMarginBottom;
         updateDefaultAnimator();
     }
 
@@ -485,12 +740,27 @@ public class RotationAwareTextView extends View {
     }
 
     /**
-     * Sets the size this control's text should be after rotation.
+     * Sets the size this control's text should be after initial rotation.
      *
      * @param targetTextSize size, in pixels.
      */
     public void setTargetTextSize(int targetTextSize) {
         this.targetTextSize = Math.max(minTextSize, targetTextSize);
+        updateDefaultAnimator();
+    }
+
+    /**
+     * @return text size at view creation (target size for reverse animation)
+     */
+    public int getOriginalTextSize() {
+        return originalTextSize;
+    }
+
+    /**
+     * @param originalTextSize target text size for reverse animation
+     */
+    public void setOriginalTextSize(int originalTextSize) {
+        this.originalTextSize = Math.max(minTextSize, originalTextSize);
         updateDefaultAnimator();
     }
 
@@ -509,7 +779,20 @@ public class RotationAwareTextView extends View {
     public void setTextSize(float textSize) {
         this.textSize = (int) Math.max(minTextSize, textSize);
         textPaint.setTextSize(this.textSize);
-        createLayout();
+    }
+
+    /**
+     * @return the animation update listener
+     */
+    public RotationAwareUpdateListener getAnimationUpdateListener() {
+        return animationUpdateListener;
+    }
+
+    /**
+     * @param animationUpdateListener handles animation updates.
+     */
+    public void setAnimationUpdateListener(RotationAwareUpdateListener animationUpdateListener) {
+        this.animationUpdateListener = animationUpdateListener;
     }
 
     /**
@@ -525,10 +808,33 @@ public class RotationAwareTextView extends View {
      * on view detachment.
      *
      * @param clearOnDetach true to enable, false to disable
-     * @hide
      */
-    public void setClearOnDetach(boolean clearOnDetach) {
+    private void setClearOnDetach(boolean clearOnDetach) {
         this.clearOnDetach = clearOnDetach;
+    }
+
+    /**
+     * The animator host offers the possibility to attach
+     * a custom animator, in an organized way.
+     *
+     * @return the animation host, containing convenience
+     * methods that help organize animations.
+     */
+    public RotationAnimatorHost getRotationAnimatorHost() {
+        return rotationAnimatorHost;
+    }
+
+    /**
+     * The animator host offers the possibility to attach
+     * a custom animator, in an organized way.
+     *
+     * @param rotationAnimatorHost Class that encapsulates
+     *                             animation data, containing
+     *                             convenience methods that
+     *                             help organize animations.
+     */
+    public void setRotationAnimatorHost(RotationAnimatorHost rotationAnimatorHost) {
+        this.rotationAnimatorHost = rotationAnimatorHost;
     }
 
     /**
@@ -622,13 +928,60 @@ public class RotationAwareTextView extends View {
     }
 
     /**
+     * rudimentary implementation of horizontal gravity
+     *
+     * @return one of:<br />
+     * GRAVITY_CENTER = 0;<br />
+     * GRAVITY_START = 1;<br />
+     * GRAVITY_END = 2;<br />
+     */
+    public int getGravity() {
+        return gravity;
+    }
+
+    /**
+     * rudimentary implementation of horizontal gravity
+     *
+     * @param gravity <br />
+     *                GRAVITY_CENTER = 0;<br />
+     *                GRAVITY_START = 1;<br />
+     *                GRAVITY_END = 2;<br />
+     */
+    public void setGravity(int gravity) {
+        this.gravity = gravity;
+    }
+
+    public void requestTextLayout(int width) {
+        createLayout(width);
+    }
+
+    public void requestInternalLayout() {
+        int width = getWidth();
+        if (width == 0) {
+            width = getMeasuredWidth();
+        }
+        if (width == 0) {
+            width = originalWidth;
+        }
+        if (width <= 0) {
+            width = 0;
+        }
+        try {
+            createLayout(width);
+        } catch (Exception x) {
+            Log.e(TAG, "requestInternalLayout: >>> ERROR <<< ", x);
+        }
+    }
+
+    /**
      * create or update the layout.
      */
-    private void createLayout() {
+    private void createLayout(int width) {
         BoringLayout.Metrics metrics = new BoringLayout.Metrics();
-        metrics.width = originalWidth; //Math.max(originalWidth, originalHeight);
+        metrics.width = (int) textPaint.measureText(text); //Math.max(originalWidth, originalHeight);
         metrics.top = 0; // only this is used
-
+        textPaint.bgColor = 0xbebeeb;
+        textPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         BoringLayout.Metrics boringMetrics = BoringLayout.isBoring(text, textPaint, metrics);
 //        Log.v(TAG, "createLayout: is it boring? " + (boringMetrics == null ? " no." : " yes."));
 
@@ -648,8 +1001,8 @@ public class RotationAwareTextView extends View {
             mLayout = ((BoringLayout) mLayout).replaceOrMake(
                     text,
                     textPaint,
-                    0,
-                    Layout.Alignment.ALIGN_CENTER,
+                    width,
+                    getAlignmentFromGravity(gravity),
                     0F,
                     0F,
                     boringMetrics,
@@ -658,13 +1011,23 @@ public class RotationAwareTextView extends View {
             mLayout = BoringLayout.make(
                     text,
                     textPaint,
-                    0,
-                    Layout.Alignment.ALIGN_CENTER,
+                    width,
+                    getAlignmentFromGravity(gravity),
                     0F,
                     0F,
                     boringMetrics,
                     true);
         }
+    }
+
+    private Layout.Alignment getAlignmentFromGravity(int gravity) {
+        if (gravity == GRAVITY_START) {
+            return Layout.Alignment.ALIGN_NORMAL;
+        }
+        if (gravity == GRAVITY_END) {
+            return Layout.Alignment.ALIGN_OPPOSITE;
+        }
+        return Layout.Alignment.ALIGN_CENTER;
     }
 
     /**

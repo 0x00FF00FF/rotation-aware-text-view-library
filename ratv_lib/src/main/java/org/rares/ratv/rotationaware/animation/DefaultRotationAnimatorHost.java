@@ -38,11 +38,27 @@ public class DefaultRotationAnimatorHost extends RotationAnimatorHost {
         int fromTextSize = reverse ? animationData.maxTextSize : animationData.minTextSize;
         int toTextSize = reverse ? animationData.minTextSize : animationData.maxTextSize;
 
+        int fromMarginLeft = reverse ? animationData.maxMarginLeft : animationData.minMarginLeft;
+        int toMarginLeft = reverse ? animationData.minMarginLeft : animationData.maxMarginLeft;
+
+        int fromMarginTop = reverse ? animationData.maxMarginTop : animationData.minMarginTop;
+        int toMarginTop = reverse ? animationData.minMarginTop : animationData.maxMarginTop;
+
+        int fromMarginRight = reverse ? animationData.maxMarginRight : animationData.minMarginRight;
+        int toMarginRight = reverse ? animationData.minMarginRight : animationData.maxMarginRight;
+
+        int fromMarginBottom = reverse ? animationData.maxMarginBottom : animationData.minMarginBottom;
+        int toMarginBottom = reverse ? animationData.minMarginBottom : animationData.maxMarginBottom;
+
         PropertyValuesHolder
                 pvhTextColor = PropertyValuesHolder.ofObject(RotationAware.TEXT_COLOR, new ArgbEvaluator(), fromTextColor, toTextColor),
                 pvhBackgroundColor = PropertyValuesHolder.ofObject(RotationAware.BACKGROUND_COLOR, new ArgbEvaluator(), fromBackgroundColor, toBackgroundColor),
                 pvhRotation = PropertyValuesHolder.ofFloat(RotationAware.ROTATION, fromRotation, toRotation),
                 pvhTextSize = PropertyValuesHolder.ofInt(RotationAware.TEXT_SIZE, fromTextSize, toTextSize),
+                pvhMarginLeft = PropertyValuesHolder.ofInt(RotationAware.MARGIN_LEFT, fromMarginLeft, toMarginLeft),
+                pvhMarginTop = PropertyValuesHolder.ofInt(RotationAware.MARGIN_TOP, fromMarginTop, toMarginTop),
+                pvhMarginRight = PropertyValuesHolder.ofInt(RotationAware.MARGIN_RIGHT, fromMarginRight, toMarginRight),
+                pvhMarginBottom = PropertyValuesHolder.ofInt(RotationAware.MARGIN_BOTTOM, fromMarginBottom, toMarginBottom),
                 pvhWidth = PropertyValuesHolder.ofInt(RotationAware.WIDTH, fromWidth, toWidth),
                 pvhHeight = PropertyValuesHolder.ofInt(RotationAware.HEIGHT, fromHeight, toHeight);
 
@@ -52,6 +68,10 @@ public class DefaultRotationAnimatorHost extends RotationAnimatorHost {
                         pvhBackgroundColor,
                         pvhRotation,
                         pvhTextSize,
+                        pvhMarginLeft,
+                        pvhMarginTop,
+                        pvhMarginRight,
+                        pvhMarginBottom,
                         pvhWidth,
                         pvhHeight);
 

@@ -26,15 +26,37 @@ public class RotationAwareUpdateListener implements ValueAnimator.AnimatorUpdate
         int bgc = (int) animation.getAnimatedValue(RotationAware.BACKGROUND_COLOR);
         int tc = (int) animation.getAnimatedValue(RotationAware.TEXT_COLOR);
         int ts = (int) animation.getAnimatedValue(RotationAware.TEXT_SIZE);
+        int ml = (int) animation.getAnimatedValue(RotationAware.MARGIN_LEFT);
+        int mt = (int) animation.getAnimatedValue(RotationAware.MARGIN_TOP);
+        int mr = (int) animation.getAnimatedValue(RotationAware.MARGIN_RIGHT);
+        int mb = (int) animation.getAnimatedValue(RotationAware.MARGIN_BOTTOM);
 
         animatedView.setRotation(rotation);
+        ViewGroup.MarginLayoutParams mlp = null;
         ViewGroup.LayoutParams layoutParams = animatedView.getLayoutParams();
+        if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
+            mlp = (ViewGroup.MarginLayoutParams) layoutParams;
+            mlp.leftMargin = ml;
+            mlp.topMargin = mt;
+            mlp.rightMargin = mr;
+            mlp.bottomMargin = mb;
+
+            mlp.width = width;
+            mlp.height = height;
+        }
+
         layoutParams.width = width;
         layoutParams.height = height;
+
         animatedView.setTextColor(tc);
         animatedView.setBackgroundColor(bgc);
         animatedView.setTextSize(ts);
-        animatedView.setLayoutParams(layoutParams);
+
+        if (mlp != null) {
+            animatedView.setLayoutParams(mlp);
+        } else {
+            animatedView.setLayoutParams(layoutParams);
+        }
     }
 
     public void clear() {
