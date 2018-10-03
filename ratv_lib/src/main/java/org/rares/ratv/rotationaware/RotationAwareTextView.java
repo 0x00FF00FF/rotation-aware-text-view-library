@@ -4,12 +4,14 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.Typeface;
 import android.support.annotation.Nullable;
 import android.support.annotation.StyleableRes;
 import android.text.BoringLayout;
 import android.text.Layout;
 import android.text.TextPaint;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -20,8 +22,6 @@ import org.rares.ratv.rotationaware.animation.AnimationDTO;
 import org.rares.ratv.rotationaware.animation.DefaultRotationAnimatorHost;
 import org.rares.ratv.rotationaware.animation.RotationAnimatorHost;
 import org.rares.ratv.rotationaware.animation.RotationAwareUpdateListener;
-
-import java.util.Locale;
 
 
 /**
@@ -104,13 +104,18 @@ public class RotationAwareTextView extends View {
     private View.OnClickListener clickListener = null;
     private RotationAwareUpdateListener animationUpdateListener = null;
 
-    private float horizontalTextOffset = 0;
-
     public final static int GRAVITY_CENTER = 0;
     public final static int GRAVITY_START = 1;
     public final static int GRAVITY_END = 2;
 
     private int gravity = GRAVITY_CENTER;
+
+    private TextUtils.TruncateAt truncateAt = TextUtils.TruncateAt.END;
+    private boolean ellipsize = false;
+
+//    canvas center, layout center, used in onDraw
+    private final PointF cc = new PointF();
+    private final PointF lc = new PointF();
 
     public RotationAwareTextView(Context context) {
         super(context);
@@ -271,8 +276,6 @@ public class RotationAwareTextView extends View {
         clear();
     }
 
-    float w = 0, h = 0;
-
     /**
      * The place where the magic happens. <br />
      * The canvas is rotated by current rotation value. <br />
@@ -286,63 +289,53 @@ public class RotationAwareTextView extends View {
      */
     @Override
     protected void onDraw(Canvas canvas) {
-        drawMiddle(canvas);
-//        canvas.save();
-        float rads = (float) Math.toRadians(Math.abs(pseudoRotation));
-        float sin = (float) Math.sin(rads);
-        float cos = (float) Math.cos(rads);
-        float signum = Math.signum(pseudoRotation);
+        cc.x = canvas.getWidth() / 2;
+        cc.y = canvas.getHeight() / 2;
+        lc.x = mLayout.getWidth() / 2;
+        lc.y = mLayout.getHeight() / 2;
 
-        float textHeight = textPaint.getTextSize() * 0.75f;
-        float textWidth = textPaint.measureText(text);
-
-        // dx:  sin*cw/2 to translate the canvas to the mid point - opposite of sin*(half the text size) to center the text
-        //      +
-        //      ...
-        // dx:  cos*ch/2 to translate the canvas to the mid point - cos*textWidth/2 to center the text <- when rotation is 0
-        //      +
-        //      sin ch/2 + to translate the canvas to the mid point + opposite of sin*(half the text length) to center the text <- when the rotation is 90
-        float dx = sin * canvas.getWidth() / 2 - (-1 * signum) * sin * mLayout.getHeight() / 2;
-        float dy = cos * canvas.getHeight() / 2 - cos * mLayout.getHeight() / 2 +
-                (sin * canvas.getHeight() / 2 + (-1 * signum) * sin * mLayout.getWidth() / 2);
-
-        String log = String.format(Locale.US,
-                "dx: %4.8s dy: %4.8s cw %4s, lw %4s, rads %4.8s",
-                dx, dy, canvas.getWidth(), mLayout.getWidth(), rads);
-
-        Log.i(TAG, "onDraw:" + log);
-
-        canvas.translate(
-                dx,
-                dy
-        );
-
-//        canvas.translate(
-//                (float) (Math.sin(Math.toRadians(pseudoRotation)) * (canvas.getWidth() + mLayout.getHeight()) / 2),
-//                (float) ((Math.sin(Math.toRadians(pseudoRotation)) * (canvas.getHeight() + mLayout.getWidth())) / 2
-//                        /*- Math.cos(Math.toRadians(pseudoRotation)) * textPaint.getTextSize() / 10*/
-//                ));
-        canvas.rotate(getRotation());
+//        drawMiddle(canvas, true);
+        canvas.rotate(pseudoRotation, cc.x, cc.y);
+        canvas.save();
+        canvas.translate(cc.x - lc.x, cc.y - lc.y);
         mLayout.draw(canvas);
-//        canvas.restore();
+//        drawMiddle(canvas, false);
+        canvas.restore();
     }
 
-    private void drawMiddle(Canvas canvas) {
+    private void drawMiddle(Canvas canvas, boolean forCanvas) {
         Paint paint = new Paint();
         paint.setStrokeWidth(2);
         paint.setColor(0xFF00AA00);
-        canvas.drawLine(
-                (float) (0),
-                (float) (canvas.getHeight() / 2),
-                (float) (canvas.getWidth()),
-                (float) (canvas.getHeight() / 2),
-                paint);
-        canvas.drawLine(
-                (float) (canvas.getWidth() / 2),
-                (float) (0),
-                (float) (canvas.getWidth() / 2),
-                (float) (canvas.getHeight()),
-                paint);
+        if (forCanvas) {
+            canvas.drawLine(
+                    (float) (0),
+                    (float) (canvas.getHeight() / 2),
+                    (float) (canvas.getWidth()),
+                    (float) (canvas.getHeight() / 2),
+                    paint);
+            canvas.drawLine(
+                    (float) (canvas.getWidth() / 2),
+                    (float) (0),
+                    (float) (canvas.getWidth() / 2),
+                    (float) (canvas.getHeight()),
+                    paint);
+        } else {
+            paint.setColor(0xFF0000AA);
+            paint.setStrokeWidth(4);
+            canvas.drawLine(
+                    (float) (0),
+                    (float) (mLayout.getHeight() / 2),
+                    (float) (mLayout.getWidth()),
+                    (float) (mLayout.getHeight() / 2),
+                    paint);
+            canvas.drawLine(
+                    (float) (mLayout.getWidth() / 2),
+                    (float) (0),
+                    (float) (mLayout.getWidth() / 2),
+                    (float) (mLayout.getHeight()),
+                    paint);
+        }
     }
 
     private AnimationDTO gatherAnimationData() {
@@ -928,7 +921,7 @@ public class RotationAwareTextView extends View {
     }
 
     /**
-     * rudimentary implementation of horizontal gravity
+     * Rudimentary implementation of horizontal gravity
      *
      * @return one of:<br />
      * GRAVITY_CENTER = 0;<br />
@@ -940,7 +933,7 @@ public class RotationAwareTextView extends View {
     }
 
     /**
-     * rudimentary implementation of horizontal gravity
+     * Rudimentary implementation of horizontal gravity
      *
      * @param gravity <br />
      *                GRAVITY_CENTER = 0;<br />
@@ -951,10 +944,53 @@ public class RotationAwareTextView extends View {
         this.gravity = gravity;
     }
 
+    /**
+     * @return true if text will be truncated if it is longer than the width
+     * of its containing view
+     */
+    public boolean isEllipsize() {
+        return ellipsize;
+    }
+
+    /**
+     * @param ellipsize set to true to truncate the text
+     *                  if it is longer than the width
+     *                  of its containing view
+     */
+    public void setEllipsize(boolean ellipsize) {
+        this.ellipsize = ellipsize;
+    }
+
+    /**
+     * @return TruncateAt showing the position where the text will be truncated.
+     * Check {@link TextUtils.TruncateAt} for more info.
+     * {@link TextUtils.TruncateAt#MARQUEE} is not supported.
+     */
+    public TextUtils.TruncateAt getEllipsizeMode() {
+        return truncateAt;
+    }
+
+    /**
+     * @param truncateAt showing the position where the text will be truncated.
+     *                   Check {@link TextUtils.TruncateAt} for more info.
+     *                   {@link TextUtils.TruncateAt#MARQUEE} is not supported.
+     */
+    public void setEllipsizeMode(TextUtils.TruncateAt truncateAt) {
+        this.truncateAt = truncateAt;
+    }
+
+    /**
+     * Request this view to layout text again with the width supplied by this method.
+     *
+     * @param width how many pixels should the text occupy
+     */
     public void requestTextLayout(int width) {
         createLayout(width);
     }
 
+    /**
+     * Request a layout without supplying any width.
+     */
     public void requestInternalLayout() {
         int width = getWidth();
         if (width == 0) {
@@ -974,14 +1010,15 @@ public class RotationAwareTextView extends View {
     }
 
     /**
-     * create or update the layout.
+     * Create or update the layout.
+     *
+     * @param width the width of the container (outer width for the boring layout)
      */
     private void createLayout(int width) {
         BoringLayout.Metrics metrics = new BoringLayout.Metrics();
         metrics.width = (int) textPaint.measureText(text); //Math.max(originalWidth, originalHeight);
         metrics.top = 0; // only this is used
-        textPaint.bgColor = 0xbebeeb;
-        textPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+
         BoringLayout.Metrics boringMetrics = BoringLayout.isBoring(text, textPaint, metrics);
 //        Log.v(TAG, "createLayout: is it boring? " + (boringMetrics == null ? " no." : " yes."));
 
@@ -1006,7 +1043,9 @@ public class RotationAwareTextView extends View {
                     0F,
                     0F,
                     boringMetrics,
-                    true);
+                    true,
+                    ellipsize ? truncateAt : null,
+                    (int) (width - textPaint.measureText("W")));
         } else {
             mLayout = BoringLayout.make(
                     text,
@@ -1016,7 +1055,9 @@ public class RotationAwareTextView extends View {
                     0F,
                     0F,
                     boringMetrics,
-                    true);
+                    true,
+                    ellipsize ? truncateAt : null,
+                    (int) (width - textPaint.measureText("W")));
         }
     }
 
