@@ -113,7 +113,7 @@ public class RotationAwareTextView extends View {
     private TextUtils.TruncateAt truncateAt = TextUtils.TruncateAt.END;
     private boolean ellipsize = false;
 
-//    canvas center, layout center, used in onDraw
+    //    canvas center, layout center, used in onDraw
     private final PointF cc = new PointF();
     private final PointF lc = new PointF();
 
@@ -258,10 +258,11 @@ public class RotationAwareTextView extends View {
     }
 
     @Override
-    public void layout(int l, int t, int r, int b) {
-        super.layout(l, t, r, b);
-//        Log.i(TAG, "layout: " + (r - l));
-        createLayout(r - l);
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        createLayout(right - left);
+        if (changed && enableDefaultAnimator) {
+            updateDefaultAnimator();
+        }
     }
 
     @Override
