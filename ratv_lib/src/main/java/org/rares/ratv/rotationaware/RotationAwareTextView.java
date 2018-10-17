@@ -19,9 +19,6 @@ import android.view.ViewGroup;
 
 import org.rares.ratv.R;
 import org.rares.ratv.rotationaware.animation.AnimationDTO;
-import org.rares.ratv.rotationaware.animation.DefaultRotationAnimatorHost;
-import org.rares.ratv.rotationaware.animation.RotationAnimatorHost;
-import org.rares.ratv.rotationaware.animation.RotationAwareUpdateListener;
 
 
 /**
@@ -48,7 +45,7 @@ import org.rares.ratv.rotationaware.animation.RotationAwareUpdateListener;
  *
  * @author rares
  */
-@SuppressWarnings("SuspiciousNameCombination")
+@SuppressWarnings("SuspiciousNameCombination, unused")
 public class RotationAwareTextView extends View {
 
     public final String TAG = RotationAwareTextView.class.getSimpleName();
@@ -97,12 +94,7 @@ public class RotationAwareTextView extends View {
     private int targetMarginRight = 0;
     private int targetMarginBottom = 0;
 
-    private boolean enableDefaultAnimator = true;
-    private boolean enableDefaultClickListener = false;
-
-    private RotationAnimatorHost rotationAnimatorHost = null;
     private View.OnClickListener clickListener = null;
-    private RotationAwareUpdateListener animationUpdateListener = null;
 
     public final static int GRAVITY_CENTER = 0;
     public final static int GRAVITY_START = 1;
@@ -191,21 +183,11 @@ public class RotationAwareTextView extends View {
             setTargetMarginRight(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_target_margin_right, originalMarginRight));
             setTargetMarginBottom(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_target_margin_bottom, originalMarginBottom));
 
-            enableDefaultAnimator = a.getBoolean(R.styleable.RotationAwareTextView_attach_default_animator, true);
-            enableDefaultClickListener = a.getBoolean(R.styleable.RotationAwareTextView_attach_default_click_listener, true);
-
             a.recycle();
 
             setTextSize(getOriginalTextSize());
             pseudoRotation = originalRotation;
 
-            if (enableDefaultAnimator) {
-                attachDefaultAnimator();
-            }
-
-            if (enableDefaultClickListener) {
-                attachDefaultClickListener();
-            }
         }
     }
 
@@ -218,7 +200,6 @@ public class RotationAwareTextView extends View {
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        boolean changed = false;
 
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
@@ -227,19 +208,15 @@ public class RotationAwareTextView extends View {
 
         if (originalWidth == ViewGroup.LayoutParams.MATCH_PARENT) {
             originalWidth = sizeW;
-            changed = true;
         }
         if (originalWidth == ViewGroup.LayoutParams.WRAP_CONTENT) {
             originalWidth = (int) textPaint.measureText(text);
-            changed = true;
         }
         if (originalHeight == ViewGroup.LayoutParams.MATCH_PARENT) {
             originalHeight = sizeH;
-            changed = true;
         }
         if (originalHeight == ViewGroup.LayoutParams.WRAP_CONTENT) {
             originalHeight = (int) (textPaint.getTextSize() * 1.25);
-            changed = true;
         }
 
         if (widthMode == MeasureSpec.AT_MOST) {
@@ -251,25 +228,13 @@ public class RotationAwareTextView extends View {
         }
 
         setMeasuredDimension(sizeW, sizeH);
-
-        if (changed && enableDefaultAnimator) {
-            updateDefaultAnimator();
-        }
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         createLayout(right - left);
-        if (changed && enableDefaultAnimator) {
-            updateDefaultAnimator();
-        }
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-//        createLayout();
-    }
 
     @Override
     protected void onDetachedFromWindow() {
@@ -339,7 +304,11 @@ public class RotationAwareTextView extends View {
         }
     }
 
-    private AnimationDTO gatherAnimationData() {
+    /**
+     * @return an animation data transfer object
+     * containing the cached values.
+     */
+    public AnimationDTO gatherAnimationData() {
         AnimationDTO animationData = new AnimationDTO();
 
         animationData.minRotation = getOriginalRotation();
@@ -363,8 +332,6 @@ public class RotationAwareTextView extends View {
         animationData.maxMarginTop = getTargetMarginTop();
         animationData.maxMarginRight = getTargetMarginRight();
         animationData.maxMarginBottom = getTargetMarginBottom();
-
-        animationData.updateListener = animationUpdateListener;
 
         return animationData;
     }
@@ -414,7 +381,6 @@ public class RotationAwareTextView extends View {
      */
     public void setTargetRotation(int targetRotation) {
         this.targetRotation = targetRotation;
-        updateDefaultAnimator();
     }
 
     /**
@@ -483,7 +449,6 @@ public class RotationAwareTextView extends View {
      */
     public void setOriginalTextColor(int originalTextColor) {
         this.originalTextColor = originalTextColor;
-        updateDefaultAnimator();
     }
 
     /**
@@ -498,7 +463,6 @@ public class RotationAwareTextView extends View {
      */
     public void setTargetHeight(int targetHeight) {
         this.targetHeight = targetHeight;
-        updateDefaultAnimator();
     }
 
     /**
@@ -515,7 +479,6 @@ public class RotationAwareTextView extends View {
      */
     public void setOriginalWidth(int originalWidth) {
         this.originalWidth = originalWidth;
-        updateDefaultAnimator();
     }
 
     /**
@@ -530,7 +493,6 @@ public class RotationAwareTextView extends View {
      */
     public void setOriginalHeight(int originalHeight) {
         this.originalHeight = originalHeight;
-        updateDefaultAnimator();
     }
 
     /**
@@ -545,7 +507,6 @@ public class RotationAwareTextView extends View {
      */
     public void setTargetWidth(int targetWidth) {
         this.targetWidth = targetWidth;
-        updateDefaultAnimator();
     }
 
     /**
@@ -560,7 +521,6 @@ public class RotationAwareTextView extends View {
      */
     public void setOriginalRotation(int originalRotation) {
         this.originalRotation = originalRotation;
-        updateDefaultAnimator();
     }
 
     /**
@@ -575,7 +535,6 @@ public class RotationAwareTextView extends View {
      */
     public void setOriginalMarginLeft(int originalMarginLeft) {
         this.originalMarginLeft = originalMarginLeft;
-        updateDefaultAnimator();
     }
 
     /**
@@ -590,7 +549,6 @@ public class RotationAwareTextView extends View {
      */
     public void setOriginalMarginTop(int originalMarginTop) {
         this.originalMarginTop = originalMarginTop;
-        updateDefaultAnimator();
     }
 
     /**
@@ -605,7 +563,6 @@ public class RotationAwareTextView extends View {
      */
     public void setOriginalMarginRight(int originalMarginRight) {
         this.originalMarginRight = originalMarginRight;
-        updateDefaultAnimator();
     }
 
     /**
@@ -620,7 +577,6 @@ public class RotationAwareTextView extends View {
      */
     public void setOriginalMarginBottom(int originalMarginBottom) {
         this.originalMarginBottom = originalMarginBottom;
-        updateDefaultAnimator();
     }
 
     /**
@@ -635,7 +591,6 @@ public class RotationAwareTextView extends View {
      */
     public void setTargetMarginLeft(int targetMarginLeft) {
         this.targetMarginLeft = targetMarginLeft;
-        updateDefaultAnimator();
     }
 
     /**
@@ -650,7 +605,6 @@ public class RotationAwareTextView extends View {
      */
     public void setTargetMarginTop(int targetMarginTop) {
         this.targetMarginTop = targetMarginTop;
-        updateDefaultAnimator();
     }
 
     /**
@@ -665,7 +619,6 @@ public class RotationAwareTextView extends View {
      */
     public void setTargetMarginRight(int targetMarginRight) {
         this.targetMarginRight = targetMarginRight;
-        updateDefaultAnimator();
     }
 
     /**
@@ -680,7 +633,6 @@ public class RotationAwareTextView extends View {
      */
     public void setTargetMarginBottom(int targetMarginBottom) {
         this.targetMarginBottom = targetMarginBottom;
-        updateDefaultAnimator();
     }
 
     /**
@@ -695,7 +647,6 @@ public class RotationAwareTextView extends View {
      */
     public void setTargetTextColor(int targetTextColor) {
         this.targetTextColor = targetTextColor;
-        updateDefaultAnimator();
     }
 
     /**
@@ -710,7 +661,6 @@ public class RotationAwareTextView extends View {
      */
     public void setTargetBackgroundColor(int targetBackgroundColor) {
         this.targetBackgroundColor = targetBackgroundColor;
-        updateDefaultAnimator();
     }
 
     /**
@@ -740,7 +690,6 @@ public class RotationAwareTextView extends View {
      */
     public void setTargetTextSize(int targetTextSize) {
         this.targetTextSize = Math.max(minTextSize, targetTextSize);
-        updateDefaultAnimator();
     }
 
     /**
@@ -755,7 +704,6 @@ public class RotationAwareTextView extends View {
      */
     public void setOriginalTextSize(int originalTextSize) {
         this.originalTextSize = Math.max(minTextSize, originalTextSize);
-        updateDefaultAnimator();
     }
 
     /**
@@ -776,20 +724,6 @@ public class RotationAwareTextView extends View {
     }
 
     /**
-     * @return the animation update listener
-     */
-    public RotationAwareUpdateListener getAnimationUpdateListener() {
-        return animationUpdateListener;
-    }
-
-    /**
-     * @param animationUpdateListener handles animation updates.
-     */
-    public void setAnimationUpdateListener(RotationAwareUpdateListener animationUpdateListener) {
-        this.animationUpdateListener = animationUpdateListener;
-    }
-
-    /**
      * @return true if the view is configured
      * to clear everything on view detachment
      */
@@ -805,120 +739,6 @@ public class RotationAwareTextView extends View {
      */
     private void setClearOnDetach(boolean clearOnDetach) {
         this.clearOnDetach = clearOnDetach;
-    }
-
-    /**
-     * The animator host offers the possibility to attach
-     * a custom animator, in an organized way.
-     *
-     * @return the animation host, containing convenience
-     * methods that help organize animations.
-     */
-    public RotationAnimatorHost getRotationAnimatorHost() {
-        return rotationAnimatorHost;
-    }
-
-    /**
-     * The animator host offers the possibility to attach
-     * a custom animator, in an organized way.
-     *
-     * @param rotationAnimatorHost Class that encapsulates
-     *                             animation data, containing
-     *                             convenience methods that
-     *                             help organize animations.
-     */
-    public void setRotationAnimatorHost(RotationAnimatorHost rotationAnimatorHost) {
-        this.rotationAnimatorHost = rotationAnimatorHost;
-    }
-
-    /**
-     * @return true if the default click listener is enabled.
-     */
-    public boolean isDefaultClickListenerEnabled() {
-        return enableDefaultClickListener;
-    }
-
-    /**
-     * Sets the value for the default click listener enabling flag.
-     * Also enables or disables the default click listener.
-     *
-     * @param enableDefaultClickListener true for enabling,
-     *                                   false for disabling
-     *                                   the default click listener
-     */
-    public void setEnableDefaultClickListener(boolean enableDefaultClickListener) {
-        this.enableDefaultClickListener = enableDefaultClickListener;
-        if (enableDefaultClickListener) {
-            attachDefaultClickListener();
-        } else {
-            detachClickListener();
-        }
-    }
-
-    private void attachDefaultClickListener() {
-        clickListener = new RotationAwareClickListener();
-        setOnClickListener(clickListener);
-    }
-
-    private void detachClickListener() {
-        clickListener = null;
-        setOnClickListener(null);
-    }
-
-    /**
-     * @return true if the default animator is enabled
-     */
-    public boolean isDefaultAnimatorEnabled() {
-        return enableDefaultAnimator;
-    }
-
-    /**
-     * Sets the value for the default animator enabling flag.
-     * Also enables or disables the default animator.
-     *
-     * @param enableDefaultAnimator true for enabling,
-     *                              false for disabling
-     *                              the default animator
-     */
-    public void setEnableDefaultAnimator(boolean enableDefaultAnimator) {
-        this.enableDefaultAnimator = enableDefaultAnimator;
-        if (enableDefaultAnimator) {
-            attachDefaultAnimator();
-        } else {
-            detachDefaultAnimator();
-        }
-    }
-
-    private void updateDefaultAnimator() {
-        if (enableDefaultAnimator && rotationAnimatorHost != null) {
-            rotationAnimatorHost.updateAnimationData(gatherAnimationData());
-        }
-    }
-
-    /**
-     * Creates new rotation animators instances. <br />
-     * Always call clear ({@link #detachDefaultAnimator}) when disposing them!
-     */
-    private void attachDefaultAnimator() {
-        animationUpdateListener = new RotationAwareUpdateListener(this);
-
-        AnimationDTO animationData = gatherAnimationData();
-
-        rotationAnimatorHost = new DefaultRotationAnimatorHost(animationData);
-    }
-
-    /**
-     * We are responsible for what we create.
-     */
-    private void detachDefaultAnimator() {
-        if (animationUpdateListener != null) {
-            animationUpdateListener.clear();
-            animationUpdateListener = null;
-        }
-        if (rotationAnimatorHost != null) {
-            rotationAnimatorHost.clear();
-            rotationAnimatorHost = null;
-        }
     }
 
     /**
@@ -1077,8 +897,6 @@ public class RotationAwareTextView extends View {
      */
     private void clear() {
         if (clearOnDetach) {
-            detachDefaultAnimator();
-            detachClickListener();
             setBackgroundDrawable(null);
             mLayout = null;
             textPaint = null;

@@ -1,7 +1,5 @@
 package org.rares.ratv.rotationaware.animation;
 
-import android.animation.ValueAnimator;
-
 /**
  * Data transfer object for sending animation values around.
  */
@@ -26,8 +24,6 @@ public class AnimationDTO {
     public int maxMarginTop;
     public int maxMarginRight;
     public int maxMarginBottom;
-
-    public ValueAnimator.AnimatorUpdateListener updateListener;
 
     @Override
     public String toString() {

@@ -11,7 +11,7 @@ import java.lang.ref.WeakReference;
  * Default update listener. It holds a {@link WeakReference} to the {@link RotationAwareTextView} that this updates.
  */
 public class RotationAwareUpdateListener implements ValueAnimator.AnimatorUpdateListener {
-    private WeakReference<RotationAwareTextView> viewReference;
+    protected WeakReference<RotationAwareTextView> viewReference;
 
     public RotationAwareUpdateListener(RotationAwareTextView animatedView) {
         viewReference = new WeakReference<>(animatedView);

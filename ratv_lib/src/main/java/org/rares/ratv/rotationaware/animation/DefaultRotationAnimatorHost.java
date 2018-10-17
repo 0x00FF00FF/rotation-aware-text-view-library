@@ -1,9 +1,12 @@
 package org.rares.ratv.rotationaware.animation;
 
+import android.animation.Animator;
 import android.animation.ArgbEvaluator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.support.annotation.NonNull;
+
+import java.util.ArrayList;
 
 /**
  * Default implementation of {@link RotationAnimatorHost}.
@@ -62,6 +65,10 @@ public class DefaultRotationAnimatorHost extends RotationAnimatorHost {
                 pvhWidth = PropertyValuesHolder.ofInt(RotationAware.WIDTH, fromWidth, toWidth),
                 pvhHeight = PropertyValuesHolder.ofInt(RotationAware.HEIGHT, fromHeight, toHeight);
 
+        if (animator != null) {
+            clearListeners(animator);
+        }
+
         animator = ValueAnimator
                 .ofPropertyValuesHolder(
                         pvhTextColor,
@@ -75,17 +82,29 @@ public class DefaultRotationAnimatorHost extends RotationAnimatorHost {
                         pvhWidth,
                         pvhHeight);
 
-        animator.addUpdateListener(animationData.updateListener);
         return animator;
+    }
+
+    private void clearListeners(ValueAnimator animator) {
+        animator.end();
+        ArrayList<Animator.AnimatorListener> listenersList = animator.getListeners();
+        if (listenersList != null && listenersList.size() > 0) {
+            for (Animator.AnimatorListener listener : listenersList) {
+                if (listener instanceof RotationAwareUpdateListener) {
+                    ((RotationAwareUpdateListener) listener).clear();
+                }
+            }
+        }
+        animator.removeAllListeners();
     }
 
     @Override
     public void clear() {
-        if (animationData != null && animationData.updateListener != null) {
-            animationData.updateListener = null;
-            this.animationData = null;
+        this.animationData = null;
+        if (animator != null) {
+            clearListeners(animator);
+            animator = null;
         }
-        this.animator = null;
     }
 
 }

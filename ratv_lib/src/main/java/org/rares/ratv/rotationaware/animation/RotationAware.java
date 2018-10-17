@@ -3,7 +3,7 @@ package org.rares.ratv.rotationaware.animation;
 /**
  * Defines terms for property animation updates.
  */
-interface RotationAware {
+public interface RotationAware {
     String ROTATION = "pseudoRotation";
     String WIDTH = "width";
     String HEIGHT = "height";
