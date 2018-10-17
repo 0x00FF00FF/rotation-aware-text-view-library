@@ -30,4 +30,5 @@ public abstract class RotationAnimatorHost {
      * that need to be cleared when the animator is no longer used.
      */
     public abstract void clear();
+    public abstract void clearListeners();
 }

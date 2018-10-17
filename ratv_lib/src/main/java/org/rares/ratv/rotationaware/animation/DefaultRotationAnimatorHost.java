@@ -65,9 +65,7 @@ public class DefaultRotationAnimatorHost extends RotationAnimatorHost {
                 pvhWidth = PropertyValuesHolder.ofInt(RotationAware.WIDTH, fromWidth, toWidth),
                 pvhHeight = PropertyValuesHolder.ofInt(RotationAware.HEIGHT, fromHeight, toHeight);
 
-        if (animator != null) {
-            clearListeners(animator);
-        }
+        clearListeners();
 
         animator = ValueAnimator
                 .ofPropertyValuesHolder(
@@ -85,7 +83,11 @@ public class DefaultRotationAnimatorHost extends RotationAnimatorHost {
         return animator;
     }
 
-    private void clearListeners(ValueAnimator animator) {
+    @Override
+    public void clearListeners() {
+        if (animator == null) {
+            return;
+        }
         animator.end();
         ArrayList<Animator.AnimatorListener> listenersList = animator.getListeners();
         if (listenersList != null && listenersList.size() > 0) {
@@ -102,7 +104,7 @@ public class DefaultRotationAnimatorHost extends RotationAnimatorHost {
     public void clear() {
         this.animationData = null;
         if (animator != null) {
-            clearListeners(animator);
+            clearListeners();
             animator = null;
         }
     }
