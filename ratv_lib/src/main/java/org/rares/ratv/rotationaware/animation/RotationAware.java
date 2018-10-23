@@ -14,5 +14,7 @@ public interface RotationAware {
     String MARGIN_TOP = "marginTop";
     String MARGIN_RIGHT = "marginRight";
     String MARGIN_BOTTOM = "marginBottom";
+    String SHADOW_RADIUS = "shadowRadius";
+    String SHADOW_COLOR = "shadowColor";
 
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Something written about the target width. -->
     <attr name="target_width" format="reference|dimension" />
     <attr name="target_height" format="reference|dimension" />
     <attr name="text_size" format="reference|dimension" />
@@ -24,7 +25,13 @@
     <attr name="background_color" format="reference|color" />
     <attr name="target_background_color" format="reference|color" />
 
+    <attr name="original_shadow_radius" format="reference|color" />
+    <attr name="target_shadow_radius" format="reference|color" />
+    <attr name="original_shadow_color" format="reference|color" />
+    <attr name="target_shadow_color" format="reference|color" />
+
     <declare-styleable name="RotationAwareTextView">
+        <!-- Something for documentation. -->
         <attr name="target_width" />
         <attr name="target_height" />
         <attr name="target_rotation" />
@@ -44,5 +51,9 @@
         <attr name="target_margin_top" />
         <attr name="target_margin_right" />
         <attr name="target_margin_bottom" />
+        <attr name="original_shadow_radius" />
+        <attr name="target_shadow_radius" />
+        <attr name="original_shadow_color" />
+        <attr name="target_shadow_color" />
     </declare-styleable>
 </resources>

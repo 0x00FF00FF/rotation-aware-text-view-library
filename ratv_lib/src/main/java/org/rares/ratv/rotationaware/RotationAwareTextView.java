@@ -34,16 +34,51 @@ import org.rares.ratv.rotationaware.animation.AnimationDTO;
  * <li>target_height</li>
  * <li>text_size</li>
  * <li>target_text_size</li>
+ * <li>original_margin_left</li>
+ * <li>original_margin_top</li>
+ * <li>original_margin_right</li>
+ * <li>original_margin_bottom</li>
+ * <li>target_margin_left</li>
+ * <li>target_margin_top</li>
+ * <li>target_margin_right</li>
+ * <li>target_margin_bottom</li>
+ * <li>original_rotation</li>
  * <li>target_rotation</li>
  * <li>text_color</li>
- * <li>background_color</li>
+ * <li>original_text_color</li>
  * <li>target_text_color</li>
+ * <li>background_color</li>
  * <li>target_background_color</li>
- * <li>attach_default_animator</li>
+ * <li>original_shadow_radius</li>
+ * <li>target_shadow_radius</li>
+ * <li>original_shadow_color</li>
+ * <li>target_shadow_color</li>
  * </ul>
  * <hr />Does not extend TextView! <hr />
  *
- * @author rares
+ * @attr ref R.styleable#RotationAwareTextView_target_width
+ * @attr ref R.styleable#RotationAwareTextView_target_height
+ * @attr ref R.styleable#RotationAwareTextView_text_size
+ * @attr ref R.styleable#RotationAwareTextView_target_text_size
+ * @attr ref R.styleable#RotationAwareTextView_original_margin_left
+ * @attr ref R.styleable#RotationAwareTextView_original_margin_top
+ * @attr ref R.styleable#RotationAwareTextView_original_margin_right
+ * @attr ref R.styleable#RotationAwareTextView_original_margin_bottom
+ * @attr ref R.styleable#RotationAwareTextView_target_margin_left
+ * @attr ref R.styleable#RotationAwareTextView_target_margin_top
+ * @attr ref R.styleable#RotationAwareTextView_target_margin_right
+ * @attr ref R.styleable#RotationAwareTextView_target_margin_bottom
+ * @attr ref R.styleable#RotationAwareTextView_original_rotation
+ * @attr ref R.styleable#RotationAwareTextView_target_rotation
+ * @attr ref R.styleable#RotationAwareTextView_text_color
+ * @attr ref R.styleable#RotationAwareTextView_original_text_color
+ * @attr ref R.styleable#RotationAwareTextView_target_text_color
+ * @attr ref R.styleable#RotationAwareTextView_background_color
+ * @attr ref R.styleable#RotationAwareTextView_target_background_color
+ * @attr ref R.styleable#RotationAwareTextView_original_shadow_radius
+ * @attr ref R.styleable#RotationAwareTextView_target_shadow_radius
+ * @attr ref R.styleable#RotationAwareTextView_original_shadow_color
+ * @attr ref R.styleable#RotationAwareTextView_target_shadow_color
  */
 @SuppressWarnings("SuspiciousNameCombination, unused")
 public class RotationAwareTextView extends View {
@@ -93,6 +128,11 @@ public class RotationAwareTextView extends View {
     private int targetMarginTop = 0;
     private int targetMarginRight = 0;
     private int targetMarginBottom = 0;
+
+    private int originalShadowRadius = 0;
+    private int targetShadowRadius = 0;
+    private int originalShadowColor = 0;
+    private int targetShadowColor = 0;
 
     private View.OnClickListener clickListener = null;
 
@@ -182,6 +222,12 @@ public class RotationAwareTextView extends View {
             setTargetMarginTop(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_target_margin_top, originalMarginTop));
             setTargetMarginRight(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_target_margin_right, originalMarginRight));
             setTargetMarginBottom(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_target_margin_bottom, originalMarginBottom));
+
+            setOriginalShadowRadius(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_original_shadow_radius, originalShadowRadius));
+            setTargetShadowRadius(a.getDimensionPixelSize(R.styleable.RotationAwareTextView_target_shadow_radius, targetShadowRadius));
+
+            setOriginalShadowColor(a.getColor(R.styleable.RotationAwareTextView_original_shadow_color, originalShadowColor));
+            setTargetShadowColor(a.getColor(R.styleable.RotationAwareTextView_target_shadow_color, targetShadowColor));
 
             a.recycle();
 
@@ -333,6 +379,10 @@ public class RotationAwareTextView extends View {
         animationData.maxMarginRight = getTargetMarginRight();
         animationData.maxMarginBottom = getTargetMarginBottom();
 
+        animationData.minShadowColor = originalShadowColor;
+        animationData.maxShadowColor = targetShadowColor;
+        animationData.minShadowRadius = originalShadowRadius;
+        animationData.maxShadowRadius = targetShadowRadius;
         return animationData;
     }
 
@@ -704,6 +754,68 @@ public class RotationAwareTextView extends View {
      */
     public void setOriginalTextSize(int originalTextSize) {
         this.originalTextSize = Math.max(minTextSize, originalTextSize);
+    }
+
+    /**
+     * @return the starting value for the shadow radius (0 means no shadow)
+     */
+    public int getOriginalShadowRadius() {
+        return originalShadowRadius;
+    }
+
+    /**
+     * @param originalShadowRadius the starting value for the
+     *                             shadow radius (0 means no shadow)
+     */
+    public void setOriginalShadowRadius(int originalShadowRadius) {
+        this.originalShadowRadius = originalShadowRadius;
+    }
+
+    /**
+     * @return the end value for the shadow radius (0 means no shadow)
+     */
+    public int getTargetShadowRadius() {
+        return targetShadowRadius;
+    }
+
+    /**
+     * @param targetShadowRadius the end value for the shadow
+     *                           radius (0 means no shadow)
+     */
+    public void setTargetShadowRadius(int targetShadowRadius) {
+        this.targetShadowRadius = targetShadowRadius;
+    }
+
+    /**
+     * @return the color used for drawing the shadow in the
+     * target position
+     */
+    public int getTargetShadowColor() {
+        return targetShadowColor;
+    }
+
+    /**
+     * @param targetShadowColor the color used for drawing the
+     *                          shadow in the target position
+     */
+    public void setTargetShadowColor(int targetShadowColor) {
+        this.targetShadowColor = targetShadowColor;
+    }
+
+    /**
+     * @return the color used for drawing the shadow in the
+     * original position
+     */
+    public int getOriginalShadowColor() {
+        return originalShadowColor;
+    }
+
+    /**
+     * @param shadowColor the color used for drawing the shadow
+     *                    in the original position
+     */
+    public void setOriginalShadowColor(int shadowColor) {
+        this.originalShadowColor = shadowColor;
     }
 
     /**

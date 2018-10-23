@@ -30,6 +30,8 @@ public class RotationAwareUpdateListener implements ValueAnimator.AnimatorUpdate
         int mt = (int) animation.getAnimatedValue(RotationAware.MARGIN_TOP);
         int mr = (int) animation.getAnimatedValue(RotationAware.MARGIN_RIGHT);
         int mb = (int) animation.getAnimatedValue(RotationAware.MARGIN_BOTTOM);
+        int sr = (int) animation.getAnimatedValue(RotationAware.SHADOW_RADIUS);
+        int sc = (int) animation.getAnimatedValue(RotationAware.SHADOW_COLOR);
 
         animatedView.setRotation(rotation);
         ViewGroup.MarginLayoutParams mlp = null;
@@ -51,6 +53,7 @@ public class RotationAwareUpdateListener implements ValueAnimator.AnimatorUpdate
         animatedView.setTextColor(tc);
         animatedView.setBackgroundColor(bgc);
         animatedView.setTextSize(ts);
+        animatedView.getTextPaint().setShadowLayer(sr, 0, 0, sc);
 
         if (mlp != null) {
             animatedView.setLayoutParams(mlp);

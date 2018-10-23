@@ -25,6 +25,11 @@ public class AnimationDTO {
     public int maxMarginRight;
     public int maxMarginBottom;
 
+    public int minShadowColor;
+    public int maxShadowColor;
+    public int minShadowRadius;
+    public int maxShadowRadius;
+
     @Override
     public String toString() {
         return AnimationDTO.class.getSimpleName() + "#" + this.hashCode() +
@@ -46,6 +51,10 @@ public class AnimationDTO {
                 "\nmaxTextSize: " + maxTextSize +
                 "\nminTextColor: " + minTextColor +
                 "\nmaxTextColor: " + maxTextColor +
+                "\nminShadowRadius: " + minShadowRadius +
+                "\nmaxShadowRadius: " + maxShadowRadius +
+                "\nminShadowColor: " + minShadowColor +
+                "\nmaxShadowColor: " + maxShadowColor +
                 "\nminBackgroundColor: " + minBackgroundColor +
                 "\nmaxBackgroundColor: " + maxBackgroundColor;
     }

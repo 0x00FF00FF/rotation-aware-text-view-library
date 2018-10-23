@@ -53,10 +53,18 @@ public class DefaultRotationAnimatorHost extends RotationAnimatorHost {
         int fromMarginBottom = reverse ? animationData.maxMarginBottom : animationData.minMarginBottom;
         int toMarginBottom = reverse ? animationData.minMarginBottom : animationData.maxMarginBottom;
 
+        int fromShadowColor = reverse ? animationData.maxShadowColor : animationData.minShadowColor;
+        int toShadowColor = reverse ? animationData.minShadowColor : animationData.maxShadowColor;
+
+        int fromShadowRadius = reverse ? animationData.maxShadowRadius : animationData.minShadowRadius;
+        int toShadowRadius = reverse ? animationData.minShadowRadius : animationData.maxShadowRadius;
+
         PropertyValuesHolder
                 pvhTextColor = PropertyValuesHolder.ofObject(RotationAware.TEXT_COLOR, new ArgbEvaluator(), fromTextColor, toTextColor),
+                pvhShadowColor = PropertyValuesHolder.ofObject(RotationAware.SHADOW_COLOR, new ArgbEvaluator(), fromShadowColor, toShadowColor),
                 pvhBackgroundColor = PropertyValuesHolder.ofObject(RotationAware.BACKGROUND_COLOR, new ArgbEvaluator(), fromBackgroundColor, toBackgroundColor),
                 pvhRotation = PropertyValuesHolder.ofFloat(RotationAware.ROTATION, fromRotation, toRotation),
+                pvhShadowRadius = PropertyValuesHolder.ofInt(RotationAware.SHADOW_RADIUS, fromShadowRadius, toShadowRadius),
                 pvhTextSize = PropertyValuesHolder.ofInt(RotationAware.TEXT_SIZE, fromTextSize, toTextSize),
                 pvhMarginLeft = PropertyValuesHolder.ofInt(RotationAware.MARGIN_LEFT, fromMarginLeft, toMarginLeft),
                 pvhMarginTop = PropertyValuesHolder.ofInt(RotationAware.MARGIN_TOP, fromMarginTop, toMarginTop),
@@ -70,8 +78,10 @@ public class DefaultRotationAnimatorHost extends RotationAnimatorHost {
         animator = ValueAnimator
                 .ofPropertyValuesHolder(
                         pvhTextColor,
+                        pvhShadowColor,
                         pvhBackgroundColor,
                         pvhRotation,
+                        pvhShadowRadius,
                         pvhTextSize,
                         pvhMarginLeft,
                         pvhMarginTop,
