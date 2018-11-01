@@ -8,7 +8,8 @@ import org.rares.ratv.rotationaware.RotationAwareTextView;
 import java.lang.ref.WeakReference;
 
 /**
- * Default update listener. It holds a {@link WeakReference} to the {@link RotationAwareTextView} that this updates.
+ * Default update listener. It holds a {@link WeakReference}
+ * to the {@link RotationAwareTextView} that this updates.
  */
 public class RotationAwareUpdateListener implements ValueAnimator.AnimatorUpdateListener {
     protected WeakReference<RotationAwareTextView> viewReference;
@@ -53,7 +54,10 @@ public class RotationAwareUpdateListener implements ValueAnimator.AnimatorUpdate
         animatedView.setTextColor(tc);
         animatedView.setBackgroundColor(bgc);
         animatedView.setTextSize(ts);
-        animatedView.getTextPaint().setShadowLayer(sr, 0, 0, sc);
+
+        animatedView.setShadowRadius(sr);
+        animatedView.setShadowColor(sc);
+        animatedView.setShadowLayer();
 
         if (mlp != null) {
             animatedView.setLayoutParams(mlp);

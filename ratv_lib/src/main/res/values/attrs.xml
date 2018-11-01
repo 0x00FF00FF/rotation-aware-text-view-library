@@ -25,8 +25,8 @@
     <attr name="background_color" format="reference|color" />
     <attr name="target_background_color" format="reference|color" />
 
-    <attr name="original_shadow_radius" format="reference|color" />
-    <attr name="target_shadow_radius" format="reference|color" />
+    <attr name="original_shadow_radius" format="reference|dimension" />
+    <attr name="target_shadow_radius" format="reference|dimension" />
     <attr name="original_shadow_color" format="reference|color" />
     <attr name="target_shadow_color" format="reference|color" />
 
