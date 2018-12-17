@@ -1,5 +1,6 @@
 package org.rares.ratv.rotationaware;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -152,10 +153,6 @@ public class RotationAwareTextView extends View {
     private final PointF cc = new PointF();
     private final PointF lc = new PointF();
 
-    private int leftMargin = 0;
-    private int rightMargin = 0;
-    private int topMargin = 0;
-    private int bottomMargin = 0;
 
     public RotationAwareTextView(Context context) {
         super(context);
@@ -282,8 +279,6 @@ public class RotationAwareTextView extends View {
             sizeH = (int) Math.min((int) textPaint.getTextSize() * 1.25, sizeH);
         }
 
-        refreshParentMargins();
-
         setMeasuredDimension(sizeW, sizeH);
     }
 
@@ -310,10 +305,11 @@ public class RotationAwareTextView extends View {
      *
      * @param canvas the object on which drawing calls are made.
      */
+    @SuppressLint("CanvasSize")
     @Override
     protected void onDraw(Canvas canvas) {
-        cc.x = (canvas.getWidth() - (leftMargin + rightMargin)) / 2;
-        cc.y = (canvas.getHeight() - (topMargin + bottomMargin)) / 2;
+        cc.x = canvas.getWidth() / 2;
+        cc.y = canvas.getHeight() / 2;
         lc.x = mLayout.getWidth() / 2;
         lc.y = mLayout.getHeight() / 2;
 
@@ -973,6 +969,14 @@ public class RotationAwareTextView extends View {
         }
     }
 
+    public int getLayoutWidth() {
+        return mLayout.getWidth();
+    }
+
+    public int getLayoutHeight() {
+        return mLayout.getHeight();
+    }
+
     /**
      * Create or update the layout.
      *
@@ -1033,31 +1037,6 @@ public class RotationAwareTextView extends View {
             return Layout.Alignment.ALIGN_OPPOSITE;
         }
         return Layout.Alignment.ALIGN_CENTER;
-    }
-
-    /**
-     * Added this because there is a problem with
-     * laying out the view when its parent has
-     * some horizontal margin and the view has fixed
-     * width. when drawing, we need to take into
-     * consideration the parent's width as well
-     */
-    private void refreshParentMargins() {
-        ViewGroup.LayoutParams lp = ((View) getParent()).getLayoutParams();
-        if (lp instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) lp;
-            if (lp.width == ViewGroup.LayoutParams.MATCH_PARENT) {
-                leftMargin = 0;
-                topMargin = 0;
-                rightMargin = 0;
-                bottomMargin = 0;
-            } else {
-                leftMargin = mlp.leftMargin;
-                topMargin = mlp.topMargin;
-                rightMargin = mlp.rightMargin;
-                bottomMargin = mlp.bottomMargin;
-            }
-        }
     }
 
     /**
