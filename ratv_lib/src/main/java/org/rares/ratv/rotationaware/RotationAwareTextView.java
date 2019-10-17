@@ -306,6 +306,7 @@ public class RotationAwareTextView extends View {
      * @param canvas the object on which drawing calls are made.
      */
     @SuppressLint("CanvasSize")
+    @SuppressWarnings("IntegerDivisionInFloatingPointContext")
     @Override
     protected void onDraw(Canvas canvas) {
         cc.x = canvas.getWidth() / 2;
@@ -467,6 +468,7 @@ public class RotationAwareTextView extends View {
             return;
         }
         this.text = txt;
+        invalidate();
     }
 
     /**
@@ -483,6 +485,7 @@ public class RotationAwareTextView extends View {
      */
     public void setTextPaint(TextPaint textPaint) {
         this.textPaint = textPaint;
+        invalidate();
     }
 
     /**
@@ -492,6 +495,7 @@ public class RotationAwareTextView extends View {
      */
     public void setTextColor(int color) {
         textPaint.setColor(color);
+        invalidate();
     }
 
     /**
@@ -731,6 +735,7 @@ public class RotationAwareTextView extends View {
     public void setBackgroundColor(int backgroundColor) {
         super.setBackgroundColor(backgroundColor);
         this.backgroundColor = backgroundColor;
+        invalidate();
     }
 
     /**
@@ -777,10 +782,12 @@ public class RotationAwareTextView extends View {
 
     public void setShadowColor(int shadowColor) {
         this.shadowColor = shadowColor;
+        invalidate();
     }
 
     public void setShadowLayer() {
         getTextPaint().setShadowLayer(shadowRadius, 0, 0, shadowColor);
+        invalidate();
     }
 
     /**
